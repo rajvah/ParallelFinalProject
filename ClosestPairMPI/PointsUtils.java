@@ -84,7 +84,7 @@ public class PointsUtils {
                 }
             }
             // print out min distance between the points
-            System.out.println(String.format("D[%d,%d]: %.4f", start, end, min));
+            //System.out.println(String.format("D[%d,%d]: %.4f", start, end, min));
             return min;
         }
 
@@ -111,7 +111,7 @@ public class PointsUtils {
         // minDistAcrossBoundry is the minimum distance bwteen points that lie across the point L
         Double minDistAcrossBoundry = MinDistanceAcrossBoundary(l,delta, sortedY);
 
-        System.out.println(String.format("D[%d,%d]: %.4f", start, end, Math.min(delta, minDistAcrossBoundry)));
+        //System.out.println(String.format("D[%d,%d]: %.4f", start, end, Math.min(delta, minDistAcrossBoundry)));
         // return the minimum between delta and minDistAcrossBoundry
         return Math.min(delta, minDistAcrossBoundry);
 

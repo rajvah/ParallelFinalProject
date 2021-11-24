@@ -19,16 +19,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.*;
+import java.util.*;
 
 public class Assignment2 {
 
     int myrank = 0;
     int nprocs = 0;
 
-    double[] x_coord = null;
-    double[] y_coord = null;
+    // double[] x_coord = null;
+    // double[] y_coord = null;
     double[] dummy = null;
     pointsGrabber[] getPoints = null;
+    pointsGrabber[] xSortedPoints = null;
+    pointsGrabber[] ySortedPoints = null;
 
 
     int averows;               // average #rows allocated to each rank
@@ -42,33 +46,33 @@ public class Assignment2 {
     final static int master = 0;
 
     private void init(int size, Points points){
-        for(int i = 0; i < size; i++){
-            x_coord[i] = points.getPoints().get(i).get(0);
-        }
-        for(int i = 0; i < size; i++){
-            y_coord[i] = points.getPoints().get(i).get(1);
-        }
+        // for(int i = 0; i < size; i++){
+        //     x_coord[i] = points.getPoints().get(i).get(0);
+        // }
+        // for(int i = 0; i < size; i++){
+        //     y_coord[i] = points.getPoints().get(i).get(1);
+        // }
         for(int i = 0; i < size; i++){
             getPoints[i] = new pointsGrabber(points.getPoints().get(i).get(0), points.getPoints().get(i).get(1));
         }
     }
+
 
     public Assignment2(int size, Points points) throws MPIException{
 
         myrank = MPI.COMM_WORLD.Rank( );
 	    nprocs = MPI.COMM_WORLD.Size( );
 
-        x_coord = new double[size];
-        y_coord = new double[size];
+        // x_coord = new double[size];
+        // y_coord = new double[size];
         dummy = new double[size];
         getPoints = new pointsGrabber[size];
-
-        
+        xSortedPoints = new pointsGrabber[size];
+        ySortedPoints = new pointsGrabber[size];
 
         if(myrank == 0){
 
             init(size, points);
-            // System.out.println(getPoints.length);
             // for(int i = 0; i < size; i++){
             //     System.out.print(getPoints[i].getX() + "," + getPoints[i].getY());
             //     System.out.println();
@@ -88,16 +92,12 @@ public class Assignment2 {
 
                 if(rank != 0){
                     MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
-                    System.out.println("Off Sent: " + offset[0]);
 		            MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
                     MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
-                    // MPI.COMM_WORLD.Send(x_coord, offset[0], rows[0], MPI.DOUBLE, rank, mtype );
-                    // MPI.COMM_WORLD.Send(y_coord, offset[0], rows[0], MPI.DOUBLE, rank, mtype );
                 }
                 offset[0] += rows[0];
             }
             
-            System.out.println( "M : " + getPoints[rows[0]].getX() + " " +getPoints[rows[0]].getY());
             ArrayList<ArrayList<Double>> listTemp = new ArrayList();
             ArrayList<ArrayList<Double>> sortedXListTemp = new ArrayList();
             ArrayList<ArrayList<Double>> sortedYListTemp = new ArrayList();
@@ -111,8 +111,10 @@ public class Assignment2 {
 
             sortedXListTemp = PointsUtils.SortByXCoordinate(listTemp);
             sortedYListTemp = PointsUtils.SortByYCoordinate(listTemp);
+
+            Double min = PointsUtils.GetMinDistance(sortedXListTemp, sortedYListTemp, 0, sortedXListTemp.size()-1);
             
-            PointsUtils.GetMinDistance(sortedXListTemp, sortedYListTemp, 0, sortedXListTemp.size()-1);
+            System.out.println("Master Min : " + min);
 
             // for(int i = 0; i < size; i++){
             //     dummy[i] = x_coord[i] + y_coord[i];
@@ -120,14 +122,21 @@ public class Assignment2 {
 
             // Collect results from each slave.
 	        // int mytpe = tagFromSlave;
-	        // for ( int source = 1; source < nprocs; source++ ) {
+            Double tempMin = 0.0;
+	        for ( int source = 1; source < nprocs; source++ ) {
+                MPI.COMM_WORLD.Recv(tempMin,0, 1, MPI.DOUBLE, source, mtype);
+                System.out.println("Master Received : " + tempMin + " from rank " + source);
+                min = Math.min(tempMin, min);
 		    // MPI.COMM_WORLD.Recv( offset, 0, 1, MPI.INT, source, mtype );
 		    // MPI.COMM_WORLD.Recv( rows, 0, 1, MPI.INT, source, mtype );
             // MPI.COMM_WORLD.Recv(dummy, offset[0], rows[0],MPI.DOUBLE, source, mtype);
-            // }
+            }
 
             Date endTime = new Date( );
+            System.out.println("Final Min : " + min);
+
             
+
             // System.out.println("Dummy");
             // for(int i = 0; i < dummy.length; i++){
             //     System.out.println(dummy[i]);
@@ -142,14 +151,27 @@ public class Assignment2 {
 	        MPI.COMM_WORLD.Recv( offset, 0, 1, MPI.INT, master, mtype );
 	        MPI.COMM_WORLD.Recv( rows, 0, 1, MPI.INT, master, mtype );
             MPI.COMM_WORLD.Recv(getPoints, 0, rows[0], MPI.OBJECT, master, mtype);
-            // MPI.COMM_WORLD.Recv( x_coord, 0, rows[0], MPI.DOUBLE, master, mtype );
-            // MPI.COMM_WORLD.Recv( y_coord, 0, rows[0], MPI.DOUBLE, master, mtype );
             
-            System.out.println( "H : " + getPoints[0].getX() + " " +getPoints[0].getY());
-            // for(int i = 0; i < size; i++){
-            //     System.out.println(getPoints[i].getX() + "," + getPoints[i].getY());
-            // }
+            ArrayList<ArrayList<Double>> listTemp = new ArrayList();
+            ArrayList<ArrayList<Double>> sortedXListTemp = new ArrayList();
+            ArrayList<ArrayList<Double>> sortedYListTemp = new ArrayList();
 
+            for(int i = 0; i < rows[0]; i++){
+                ArrayList<Double> anotherTemp = new ArrayList();
+                anotherTemp.add(getPoints[i].getX());
+                anotherTemp.add(getPoints[i].getY());
+                listTemp.add(anotherTemp);
+            }
+
+            sortedXListTemp = PointsUtils.SortByXCoordinate(listTemp);
+            sortedYListTemp = PointsUtils.SortByYCoordinate(listTemp);
+
+            Double min = PointsUtils.GetMinDistance(sortedXListTemp, sortedYListTemp, 0, sortedXListTemp.size()-1);
+            
+            System.out.println("Worker" + myrank + " Min : " + min);
+
+            MPI.COMM_WORLD.Send(min, 0, 1, MPI.DOUBLE, master, mtype);
+            System.out.println("Worker" + myrank + " sent : " + min);
             // MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, master, mtype );
 	        // MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, master, mtype );
             // MPI.COMM_WORLD.Send( dummy, 0, rows[0], MPI.DOUBLE, master, mtype );

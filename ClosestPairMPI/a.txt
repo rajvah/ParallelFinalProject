@@ -1,30 +1,20 @@
 sending 20 rows to rank 0
 sending 20 rows to rank 1
-Off Sent: 20
 sending 20 rows to rank 2
-Off Sent: 40
 sending 20 rows to rank 3
-Off Sent: 60
 sending 20 rows to rank 4
-Off Sent: 80
-M : 87.5973 72.6676
-D[0,2]: 7.1113
-D[3,4]: 36.0846
-D[0,4]: 7.1113
-D[5,7]: 19.6056
-D[8,9]: 80.1437
-D[5,9]: 7.1113
-D[0,9]: 5.3747
-D[10,12]: 8.5389
-D[13,14]: 10.5752
-D[10,14]: 7.8796
-D[15,17]: 14.3494
-D[18,19]: 34.3512
-D[15,19]: 6.8542
-D[10,19]: 6.8542
-D[0,19]: 5.3747
-H : 87.5973 72.6676
-time elapsed = 87 msec
-H : 53.1327 19.4067
-H : 73.2017 40.5591
-H : 59.9048 38.5235
+Master Min : 5.374688102578608
+Worker2 Min : 3.020357152722171
+Worker2 sent : 3.020357152722171
+Worker3 Min : 7.043222288129202
+Worker3 sent : 7.043222288129202
+Worker1 Min : 2.6232913143606456
+Worker1 sent : 2.6232913143606456
+Worker4 Min : 3.1953621171942337
+Worker4 sent : 3.1953621171942337
+Master Received : 2.6232913143606456 from rank 1
+Master Received : 3.020357152722171 from rank 2
+Master Received : 7.043222288129202 from rank 3
+Master Received : 3.1953621171942337 from rank 4
+Final Min : 2.6232913143606456
+time elapsed = 93 msec
