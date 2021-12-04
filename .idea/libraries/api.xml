@@ -1,0 +1,28 @@
+<component name="libraryTable">
+  <library name="api">
+    <CLASSES />
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/doc/api" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/examples/Nozzle" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/examples/PingPong" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/examples/metropolis" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/examples/potts" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/examples/simple" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/src" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/src/Java" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/ccl" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/ccl_ObjSer" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/comm" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/dtyp" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/dtyp_ObjSer" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/env" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/group" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/pt2pt" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/pt2pt_ObjSer" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/signals" />
+      <root url="file://$PROJECT_DIR$/../Downloads/mpiJava-1.2.5x.tar/mpiJava-1.2.5x/mpiJava/tests/topo" />
+    </SOURCES>
+  </library>
+</component>
