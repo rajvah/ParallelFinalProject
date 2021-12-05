@@ -169,21 +169,22 @@ public class PointsUtils {
         );
     }
 
-    private static void init(int size, Points points) {
+    public static PointsGrabber[] init(int size, Points points) {
         PointsGrabber[] getPoints = new PointsGrabber[size];
         for(int i = 0; i < size; i++){
             getPoints[i] = new PointsGrabber(points.getPoints().get(i).get(0), points.getPoints().get(i).get(1));
         }
+        return getPoints;
     }
 
-    public static void calculateLocalMinima(int size, Points points) throws MPIException {
+    public static void calculateLocalMinima(PointsGrabber[] getPoints) throws MPIException {
 
         int myrank = 0;
         int nprocs = 0;
 
-        
+        int size = getPoints.length;
+
         double[] dummy = new double[size];
-        PointsGrabber[] getPoints = new PointsGrabber[size];
         PointsGrabber[] xSortedPoints = new PointsGrabber[size];
         PointsGrabber[] ySortedPoints = new PointsGrabber[size];
 
@@ -194,8 +195,7 @@ public class PointsUtils {
         int mtype;                 // message type (tagFromMaster or tagFromSlave )
 
         if(myrank == 0) {
-
-            init(size, points);
+            
             averows = size / nprocs;
             extra = size % nprocs;
             offset[0] = 0;
@@ -203,15 +203,13 @@ public class PointsUtils {
 
             Date startTime = new Date( );
 
-            for ( int rank = 0; rank < nprocs; rank++ ) {
+            for ( int rank = 1; rank < nprocs; rank++ ) {
                 rows[0] = ( rank < extra ) ? averows + 1 : averows;
                 System.out.println( "sending " + rows[0] + " rows to rank " + rank );
 
-                if(rank != 0){
-                    MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
-                    MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
-                    MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
-                }
+                MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
+                MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
+                MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
                 offset[0] += rows[0];
             }
 
@@ -270,14 +268,25 @@ public class PointsUtils {
 
             MPI.COMM_WORLD.Send(min, 0, 1, MPI.DOUBLE, MASTER, mtype);
             System.out.println("Worker" + myrank + " sent : " + min);
+
+
         }
     }
 
-    public static void calculateBorderMinima(int size, Points point, double minimum) {
-        int averows = size / nprocs;
-        int extra = size % nprocs;
-        int[] offset = new int[1];
-        offset[0] = 0;
+    public static void calculateBorderMinima(int size, Points point, double minimum) throws MPIException {
+        int myrank = 0;
+        int nprocs = 0;
+        
+        double[] dummy = new double[size];
+        PointsGrabber[] getPoints = new PointsGrabber[size];
+        PointsGrabber[] xSortedPoints = new PointsGrabber[size];
+        PointsGrabber[] ySortedPoints = new PointsGrabber[size];
+
+        int averows = size/nprocs;               // average #rows allocated to each rank
+        int extra = size%nprocs;                 // extra #rows allocated to some ranks
+        int offset[] = new int[1]; // offset in row
+        int rows[] = new int[1];   // the actual # rows allocated to each rank
+        int mtype = TAG_FROM_MASTER;                 // message type (tagFromMaster or tagFromSlave )
         
         for ( int rank = 1; rank < nprocs; rank+=2 ) {
             rows[0] = ( rank < extra ) ? averows + 1 : averows;
@@ -285,8 +294,8 @@ public class PointsUtils {
             
             System.out.println( "sending " + rows[0] + " rows to rank " + rank );
 
-            MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
-            MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
+            MPI.COMM_WORLD.Send(offset, 0, 1, MPI.INT, rank, mtype );
+            MPI.COMM_WORLD.Send(rows, 0, 1, MPI.INT, rank, mtype );
             MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
         }
     }

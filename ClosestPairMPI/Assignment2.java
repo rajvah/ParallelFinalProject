@@ -57,28 +57,12 @@ public class Assignment2 {
         // close the buffer reader
         br.close();
         int size = points.getNumberOfPoints();
-        MPI.COMM_WORLD.Bcast(size, 0, 1, MPI.INT, MASTER);
-        PointsUtils.calculateLocalMinima(size, points);
-        calculateBorderMinima();
+        MPI.COMM_WORLD.Bcast(size, 0, 1, MPI.INT, PointsUtils.MASTER);
+        PointsGrabber[] getPoints = PointsUtils.init(size, points);
+        PointsUtils.calculateLocalMinima(getPoints);
+        //PointsUtils.calculateBorderMinima(size, points);
         MPI.Finalize();
 
     }
 
-    private void calculateBorderMinima(int size, Points point, double minimum) {
-        int averows = size / nprocs;
-        int extra = size % nprocs;
-        int[] offset = new int[1];
-        offset[0] = 0;
-        
-        for ( int rank = 1; rank < nprocs; rank+=2 ) {
-            rows[0] = ( rank < extra ) ? averows + 1 : averows;
-            offset[0] += rows[0];
-            
-            System.out.println( "sending " + rows[0] + " rows to rank " + rank );
-
-            MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
-            MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
-            MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
-        }
-    }
 }
