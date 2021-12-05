@@ -1,0 +1,20 @@
+sending 20 rows to rank 0
+sending 20 rows to rank 1
+sending 20 rows to rank 2
+sending 20 rows to rank 3
+sending 20 rows to rank 4
+Master Min : 5.374688102578608
+Worker2 Min : 3.020357152722171
+Worker2 sent : 3.020357152722171
+Worker3 Min : 7.043222288129202
+Worker3 sent : 7.043222288129202
+Worker1 Min : 2.6232913143606456
+Worker1 sent : 2.6232913143606456
+Worker4 Min : 3.1953621171942337
+Worker4 sent : 3.1953621171942337
+Master Received : 2.6232913143606456 from rank 1
+Master Received : 3.020357152722171 from rank 2
+Master Received : 7.043222288129202 from rank 3
+Master Received : 3.1953621171942337 from rank 4
+Final Min : 2.6232913143606456
+time elapsed = 93 msec
