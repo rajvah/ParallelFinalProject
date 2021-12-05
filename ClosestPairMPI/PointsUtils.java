@@ -179,8 +179,8 @@ public class PointsUtils {
 
     public static void calculateLocalMinima(PointsGrabber[] getPoints) throws MPIException {
 
-        int myrank = 0;
-        int nprocs = 0;
+        int myrank = MPI.COMM_WORLD.Rank( );
+        int nprocs = MPI.COMM_WORLD.Size( );
 
         int size = getPoints.length;
 

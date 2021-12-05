@@ -32,10 +32,7 @@ public class Assignment2 {
     PointsGrabber[] ySortedPoints = null;
 
     public static void main(String[] args) throws IOException, MPIException {
-
-        int myrank = MPI.COMM_WORLD.Rank( );
-        int nprocs = MPI.COMM_WORLD.Size( );
-        MPI.Init(args) ;
+        MPI.Init(args);
         File file = new File("program2data.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
