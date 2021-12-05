@@ -1,12 +1,12 @@
 import java.util.*;
 import java.io.*;
 
-public class pointsGrabber implements Serializable{
+public class PointsGrabber implements Serializable{
     private double x, y;
 
-    public pointsGrabber(){}
+    public PointsGrabber(){}
 
-    pointsGrabber(double x, double y){
+    PointsGrabber(double x, double y){
         this.x = x;
         this.y = y;
     }

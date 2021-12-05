@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Users\\saras\\Downloads\\mpi_jar_files/**/*.jar"
+    ]
+}
