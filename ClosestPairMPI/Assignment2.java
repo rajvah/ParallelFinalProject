@@ -27,15 +27,12 @@ public class Assignment2 {
     // double[] x_coord = null;
     // double[] y_coord = null;
     double[] dummy = null;
-    PointsGrabber[] getPoints = null;
-    PointsGrabber[] xSortedPoints = null;
-    PointsGrabber[] ySortedPoints = null;
+    static PointsGrabber[] getPoints = null;
+    static PointsGrabber[] xSortedPoints = null;
+    static PointsGrabber[] ySortedPoints = null;
 
     public static void main(String[] args) throws IOException, MPIException {
-
-        int myrank = MPI.COMM_WORLD.Rank( );
-        int nprocs = MPI.COMM_WORLD.Size( );
-        MPI.Init(args) ;
+        MPI.Init(args);
         File file = new File("program2data.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
@@ -57,28 +54,18 @@ public class Assignment2 {
         // close the buffer reader
         br.close();
         int size = points.getNumberOfPoints();
-        MPI.COMM_WORLD.Bcast(size, 0, 1, MPI.INT, MASTER);
-        PointsUtils.calculateLocalMinima(size, points);
-        calculateBorderMinima();
+        MPI.COMM_WORLD.Bcast(size, 0, 1, MPI.INT, PointsUtils.MASTER);
+        getPoints = PointsUtils.init(size, points);
+        xSortedPoints = getPoints.clone(); //Cloning original array into new array which will have points sorted according to x coordinates
+        ySortedPoints = getPoints.clone(); //Cloning original array into new array which will have points sorted according to y coordinates
+        
+        PointsUtils.sortByX(xSortedPoints); //Sorting by X coordinates
+        PointsUtils.sortByY(ySortedPoints); //Sorting by Y coordinates
+        
+        PointsUtils.calculateLocalMinima(xSortedPoints, ySortedPoints);
+        //PointsUtils.calculateBorderMinima(size, points);
         MPI.Finalize();
 
     }
 
-    private void calculateBorderMinima(int size, Points point, double minimum) {
-        int averows = size / nprocs;
-        int extra = size % nprocs;
-        int[] offset = new int[1];
-        offset[0] = 0;
-        
-        for ( int rank = 1; rank < nprocs; rank+=2 ) {
-            rows[0] = ( rank < extra ) ? averows + 1 : averows;
-            offset[0] += rows[0];
-            
-            System.out.println( "sending " + rows[0] + " rows to rank " + rank );
-
-            MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
-            MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
-            MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
-        }
-    }
 }
