@@ -13,8 +13,8 @@
 //package Assignment2;
 
 import mpi.*;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
+
 
 public class PointsUtils {
 
@@ -65,6 +65,15 @@ public class PointsUtils {
         points.sort((o1, o2) -> o1.get(1).compareTo(o2.get(1)));
         ArrayList<ArrayList<Double>> p1 = (ArrayList<ArrayList<Double>>) points.clone();
         return p1;
+    }
+    public static void sortByX(PointsGrabber[] getPoints){
+        Comparator<PointsGrabber> sortingByX = Comparator.comparingDouble(PointsGrabber::getX);
+        Arrays.sort(getPoints, sortingByX);
+    }
+
+    public static void sortByY(PointsGrabber[] getPoints){
+        Comparator<PointsGrabber> sortingByY = Comparator.comparingDouble(PointsGrabber::getY);
+        Arrays.sort(getPoints, sortingByY);
     }
 
     //Params:
@@ -177,16 +186,12 @@ public class PointsUtils {
         return getPoints;
     }
 
-    public static void calculateLocalMinima(PointsGrabber[] getPoints) throws MPIException {
+    public static void calculateLocalMinima(PointsGrabber[] xSortedPoints, PointsGrabber[] ySortedPoints) throws MPIException {
 
         int myrank = MPI.COMM_WORLD.Rank( );
         int nprocs = MPI.COMM_WORLD.Size( );
 
-        int size = getPoints.length;
-
-        double[] dummy = new double[size];
-        PointsGrabber[] xSortedPoints = new PointsGrabber[size];
-        PointsGrabber[] ySortedPoints = new PointsGrabber[size];
+        int size = xSortedPoints.length;
 
         int averows;               // average #rows allocated to each rank
         int extra;                 // extra #rows allocated to some ranks
@@ -209,7 +214,8 @@ public class PointsUtils {
 
                 MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
                 MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
-                MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
+                MPI.COMM_WORLD.Send(xSortedPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
+
                 offset[0] += rows[0];
             }
 
@@ -219,8 +225,8 @@ public class PointsUtils {
 
             for(int i = 0; i < rows[0]; i++){
                 ArrayList<Double> anotherTemp = new ArrayList<>();
-                anotherTemp.add(getPoints[i].getX());
-                anotherTemp.add(getPoints[i].getY());
+                anotherTemp.add(xSortedPoints[i].getX());
+                anotherTemp.add(xSortedPoints[i].getY());
                 listTemp.add(anotherTemp);
             }
 
@@ -246,7 +252,7 @@ public class PointsUtils {
             mtype = TAG_FROM_MASTER;
             MPI.COMM_WORLD.Recv( offset, 0, 1, MPI.INT, MASTER, mtype );
             MPI.COMM_WORLD.Recv( rows, 0, 1, MPI.INT, MASTER, mtype );
-            MPI.COMM_WORLD.Recv(getPoints, 0, rows[0], MPI.OBJECT, MASTER, mtype);
+            MPI.COMM_WORLD.Recv(xSortedPoints, 0, rows[0], MPI.OBJECT, MASTER, mtype);
 
             ArrayList<ArrayList<Double>> listTemp = new ArrayList<>();
             ArrayList<ArrayList<Double>> sortedXListTemp = new ArrayList<>();
@@ -254,8 +260,8 @@ public class PointsUtils {
 
             for(int i = 0; i < rows[0]; i++){
                 ArrayList<Double> anotherTemp = new ArrayList<>();
-                anotherTemp.add(getPoints[i].getX());
-                anotherTemp.add(getPoints[i].getY());
+                anotherTemp.add(xSortedPoints[i].getX());
+                anotherTemp.add(xSortedPoints[i].getY());
                 listTemp.add(anotherTemp);
             }
 
@@ -299,5 +305,4 @@ public class PointsUtils {
             MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
         }
     }
-
 }

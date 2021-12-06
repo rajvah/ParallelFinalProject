@@ -55,8 +55,14 @@ public class Assignment2 {
         br.close();
         int size = points.getNumberOfPoints();
         MPI.COMM_WORLD.Bcast(size, 0, 1, MPI.INT, PointsUtils.MASTER);
-        PointsGrabber[] getPoints = PointsUtils.init(size, points);
-        PointsUtils.calculateLocalMinima(getPoints);
+        getPoints = PointsUtils.init(size, points);
+        xSortedPoints = getPoints.clone(); //Cloning original array into new array which will have points sorted according to x coordinates
+        ySortedPoints = getPoints.clone(); //Cloning original array into new array which will have points sorted according to y coordinates
+        
+        PointsUtils.sortByX(xSortedPoints); //Sorting by X coordinates
+        PointsUtils.sortByY(ySortedPoints); //Sorting by Y coordinates
+        
+        PointsUtils.calculateLocalMinima(xSortedPoints, ySortedPoints);
         //PointsUtils.calculateBorderMinima(size, points);
         MPI.Finalize();
 
