@@ -15,6 +15,7 @@
 import mpi.*;
 import java.util.*;
 
+
 public class PointsUtils {
 
     public final static int TAG_FROM_MASTER = 1;
@@ -65,7 +66,6 @@ public class PointsUtils {
         ArrayList<ArrayList<Double>> p1 = (ArrayList<ArrayList<Double>>) points.clone();
         return p1;
     }
-
     public static void sortByX(PointsGrabber[] getPoints){
         Comparator<PointsGrabber> sortingByX = Comparator.comparingDouble(PointsGrabber::getX);
         Arrays.sort(getPoints, sortingByX);
@@ -76,7 +76,6 @@ public class PointsUtils {
         Arrays.sort(getPoints, sortingByY);
     }
 
-    
     //Params:
     // * ArrayList<ArrayList<Double>> of coordinates sorted along X coordinates,
     // * ArrayList<ArrayList<Double>> of coordinates sorted along Y coordinates
@@ -216,6 +215,7 @@ public class PointsUtils {
                 MPI.COMM_WORLD.Send( offset, 0, 1, MPI.INT, rank, mtype );
                 MPI.COMM_WORLD.Send( rows, 0, 1, MPI.INT, rank, mtype );
                 MPI.COMM_WORLD.Send(xSortedPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
+
                 offset[0] += rows[0];
             }
 
@@ -305,5 +305,4 @@ public class PointsUtils {
             MPI.COMM_WORLD.Send(getPoints, offset[0], rows[0], MPI.OBJECT, rank, mtype);
         }
     }
-
 }

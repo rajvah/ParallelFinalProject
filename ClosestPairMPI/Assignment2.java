@@ -27,9 +27,9 @@ public class Assignment2 {
     // double[] x_coord = null;
     // double[] y_coord = null;
     double[] dummy = null;
-    static PointsGrabber[] getPoints = null;
-    static PointsGrabber[] xSortedPoints = null;
-    static PointsGrabber[] ySortedPoints = null;
+    PointsGrabber[] getPoints = null;
+    PointsGrabber[] xSortedPoints = null;
+    PointsGrabber[] ySortedPoints = null;
 
     public static void main(String[] args) throws IOException, MPIException {
         MPI.Init(args);
