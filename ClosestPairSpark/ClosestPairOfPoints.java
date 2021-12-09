@@ -22,7 +22,6 @@ public class ClosestPairOfPoints {
     });
 
     JavaRDD<Coordinates> p2 = points.sortBy(i -> {return i.x; }, true, 1 );
-
         for (Coordinates test : p2.collect())
         {
             System.out.println(test.x + ", " + test.y);
