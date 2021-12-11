@@ -31,10 +31,8 @@ public class ClosestPairOfPoints {
             Coordinates c = new Coordinates( Double.parseDouble(pts[0]), Double.parseDouble(pts[1]));
             return c;
         });
-
-        JavaRDD<Coordinates> p2 = points.sortBy(i -> {return i.x; }, true, 1 ); //Sorting by x-coordinates
         
-        JavaPairRDD<Coordinates,Coordinates> pointsPairRDD = p2.cartesian(p2); //creating a pair RDD of the coordinates, each point is a pair with every other point.
+        JavaPairRDD<Coordinates,Coordinates> pointsPairRDD = points.cartesian(points); //creating a pair RDD of the coordinates, each point is a pair with every other point.
 
         JavaDoubleRDD distances = pointsPairRDD.mapToDouble(new DoubleFunction<Tuple2<Coordinates, Coordinates>>() { //storing the distances in JavaDoubleRDD
             @Override
