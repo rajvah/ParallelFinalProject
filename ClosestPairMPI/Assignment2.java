@@ -5,7 +5,7 @@
  *  *  Functionality is to parse the points in the program2data.txt file and get the
  *  *  minimum distance between the points inside the file
  *  *
- * @author Sidhant Bansal
+ * @author Sidhant, Harshit and Kanika
  */
 
 //package Assignment2;
@@ -24,16 +24,13 @@ import java.util.*;
 
 public class Assignment2 {
 
-    // double[] x_coord = null;
-    // double[] y_coord = null;
-    double[] dummy = null;
-    PointsGrabber[] getPoints = null;
-    PointsGrabber[] xSortedPoints = null;
-    PointsGrabber[] ySortedPoints = null;
+    static PointsGrabber[] getPoints = null;
+    static PointsGrabber[] xSortedPoints = null;
+    static Double minima = 0.0;
 
     public static void main(String[] args) throws IOException, MPIException {
-        MPI.Init(args);
-        File file = new File("program2data.txt");
+        
+        File file = new File("10000.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         int number = Integer.parseInt(line);
@@ -54,18 +51,16 @@ public class Assignment2 {
         // close the buffer reader
         br.close();
         int size = points.getNumberOfPoints();
-        MPI.COMM_WORLD.Bcast(size, 0, 1, MPI.INT, PointsUtils.MASTER);
         getPoints = PointsUtils.init(size, points);
         xSortedPoints = getPoints.clone(); //Cloning original array into new array which will have points sorted according to x coordinates
-        ySortedPoints = getPoints.clone(); //Cloning original array into new array which will have points sorted according to y coordinates
-        
         PointsUtils.sortByX(xSortedPoints); //Sorting by X coordinates
-        PointsUtils.sortByY(ySortedPoints); //Sorting by Y coordinates
         
-        PointsUtils.calculateLocalMinima(xSortedPoints, ySortedPoints);
-        //PointsUtils.calculateBorderMinima(size, points);
+        Date startTime = new Date( );
+        MPI.Init(args);
+        Double min = PointsUtils.calculateLocalMinima(xSortedPoints);
+        PointsUtils.calculateBorderMinima(xSortedPoints, min, startTime); 
         MPI.Finalize();
 
+        
     }
-
 }
