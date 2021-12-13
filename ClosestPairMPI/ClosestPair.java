@@ -5,32 +5,25 @@
  *  *  Functionality is to parse the points in the program2data.txt file and get the
  *  *  minimum distance between the points inside the file
  *  *
- * @author Sidhant, Harshit and Kanika
+ *  * @author Sidhant, Harshit and Kanika
  */
 
-//package Assignment2;
-
 import mpi.*;           // for mpiJava
-import java.net.*;      // for InetAddress
 import java.util.*;     // for Date
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.*;       // To implement the file reader
 import java.lang.*;
 import java.util.*;
 
-public class Assignment2 {
+public class ClosestPair {
 
-    static PointsGrabber[] getPoints = null;
-    static PointsGrabber[] xSortedPoints = null;
-    static Double minima = 0.0;
+    static Points[] getPoints = null;
+    static Points[] xSortedPoints = null;
 
     public static void main(String[] args) throws IOException, MPIException {
         
-        File file = new File("10000.txt");
+        //Starting the process to read the input file.
+        File file = new File(args[0]);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         int number = Integer.parseInt(line);
@@ -59,8 +52,6 @@ public class Assignment2 {
         MPI.Init(args);
         Double min = PointsUtils.calculateLocalMinima(xSortedPoints);
         PointsUtils.calculateBorderMinima(xSortedPoints, min, startTime); 
-        MPI.Finalize();
-
-        
+        MPI.Finalize();        
     }
 }

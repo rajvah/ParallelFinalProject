@@ -1,2 +1,0 @@
-Final min: 1.4754246034389542
-time elapsed = 884 msec
