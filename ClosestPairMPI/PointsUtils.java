@@ -7,7 +7,7 @@
  *  Sorting the list along the Y coordinate
  *  Calculating the minimum distance between two points in the given list of points
  *
- * @author Harshit Rajvaidya
+ * @author Sidhant, Harshit and Kanika
  */
 
 //package Assignment2;
@@ -48,13 +48,13 @@ public class PointsUtils {
         return points;
     }
 
-    public static void sortByX(PointsGrabber[] getPoints){
-        Comparator<PointsGrabber> sortingByX = Comparator.comparingDouble(PointsGrabber::getX);
+    public static void sortByX(Points[] getPoints){
+        Comparator<Points> sortingByX = Comparator.comparingDouble(Points::getX);
         Arrays.sort(getPoints, sortingByX);
     }
 
-    public static void sortByY(PointsGrabber[] getPoints){
-        Comparator<PointsGrabber> sortingByY = Comparator.comparingDouble(PointsGrabber::getY);
+    public static void sortByY(Points[] getPoints){
+        Comparator<Points> sortingByY = Comparator.comparingDouble(Points::getY);
         Arrays.sort(getPoints, sortingByY);
     }
 
@@ -67,7 +67,7 @@ public class PointsUtils {
     // Returns: ArrayList<ArrayList<Double>> of coordinates sorted along the x coordinate
     // Pre: A list of all the points along the X coordinates
     // Post: A double minimum distance between the all points in the 2D plane
-    public static Double GetMinDistance(PointsGrabber[] xSortedPoints, PointsGrabber[] ySortedPoints, int start ,int end){
+    public static Double GetMinDistance(Points[] xSortedPoints, Points[] ySortedPoints, int start ,int end){
 
         // return section of the recursive function
         // if number of elements in the list is less than 4 then use brute force
@@ -93,11 +93,11 @@ public class PointsUtils {
         Double l = ((xSortedPoints[mid-1].getX() + xSortedPoints[mid].getX()) / 2);
 
         // Create a sublist of the points that lie between the start and the dividing line L
-        PointsGrabber[] AlistFirst = Arrays.copyOfRange(xSortedPoints, 0, mid);
+        Points[] AlistFirst = Arrays.copyOfRange(xSortedPoints, 0, mid);
 
         // Create a sublist of the points that lie between the dividing line L and
         // the last of existing point in the sorted array
-        PointsGrabber[] AlistSecond = Arrays.copyOfRange(xSortedPoints, mid, xSortedPoints.length);
+        Points[] AlistSecond = Arrays.copyOfRange(xSortedPoints, mid, xSortedPoints.length);
 
         // delta is the minimum distance between the points that lie on the either side of our line L
        Double delta = Math.min( GetMinDistance( AlistFirst, ySortedPoints, start, start + mid  -1),
@@ -121,9 +121,9 @@ public class PointsUtils {
     // * A Double delta which is the minimum distance between the points along the dividing plane
     // * A dividing line L
     // Post: A double minimum distance between the points across the dividing line L
-    private static Double MinDistanceAcrossBoundary(Double l , Double delta, PointsGrabber[] ySortedPoints){
+    private static Double MinDistanceAcrossBoundary(Double l , Double delta, Points[] ySortedPoints){
         //array list to store all the points that lie in the delta range
-        PointsGrabber[] pointsBetweenPlane = new PointsGrabber[ySortedPoints.length];
+        Points[] pointsBetweenPlane = new Points[ySortedPoints.length];
 
         //creating lower and upper bound which will be + or - delta away from Line L
         double upperBound = l + delta;
@@ -161,15 +161,16 @@ public class PointsUtils {
         );
     }
 
-    public static PointsGrabber[] init(int size, Points points) {
-        PointsGrabber[] getPoints = new PointsGrabber[size];
+    public static Points[] init(int size, Points points) {
+        Points[] getPoints = new Points[size];
         for(int i = 0; i < size; i++){
-            getPoints[i] = new PointsGrabber(points.getPoints().get(i).get(0), points.getPoints().get(i).get(1));
+            getPoints[i] = new Points(points.getPoints().get(i).get(0), points.getPoints().get(i).get(1));
         }
         return getPoints;
     }
 
-    public static Double calculateLocalMinima(PointsGrabber[] xSortedPoints) throws MPIException{
+    //Function that calculates minimum for every node. 
+    public static Double calculateLocalMinima(Points[] xSortedPoints) throws MPIException{
 
         int myrank = MPI.COMM_WORLD.Rank();
         int nprocs = MPI.COMM_WORLD.Size();
@@ -184,11 +185,8 @@ public class PointsUtils {
         Double finalMinimum = Double.MAX_VALUE; 
         Double masterMinimum = 0.0;
         Double rankMinimum = 0.0;
-        PointsGrabber[] receivedXSorted = null;
-        PointsGrabber[] ySortedPoints = null;
-        int borderIndex = 0;
-        int sizeOfPointsList[] = new int[1];
-        PointsGrabber[] pointsArr = null;
+        Points[] receivedXSorted = null;
+        Points[] ySortedPoints = null;
 
         if(myrank == 0){
             averows = size / nprocs;
@@ -202,7 +200,6 @@ public class PointsUtils {
                 if(rank == 0){ // This is useful only when rank 0 has to take care of the remainder rows. 
                     receivedXSorted = Arrays.copyOfRange(xSortedPoints,0, rows[0]);
                 }
-                //System.out.println( "sending " + rows[0] + " rows to rank " + rank );
                 if(rank != 0){
                     MPI.COMM_WORLD.Send(offset, 0, 1, MPI.INT, rank, mtype);
                     MPI.COMM_WORLD.Send(rows, 0, 1, MPI.INT, rank, mtype );
@@ -213,58 +210,37 @@ public class PointsUtils {
 
             ySortedPoints = receivedXSorted.clone();
 
-            masterMinimum = GetMinDistance(receivedXSorted, ySortedPoints, 0, receivedXSorted.length-1);
-
-            //System.out.println("Rank: " + myrank + " min: " + masterMinimum);
+            masterMinimum = GetMinDistance(receivedXSorted, ySortedPoints, 0, receivedXSorted.length-1);//Rank 0 caluclating the minimum distance for their set of points.
 
             Double tempMin = 0.0;
             for ( int source = 1; source < nprocs; source++ ) {
-                MPI.COMM_WORLD.Recv(tempMin,0, 1, MPI.DOUBLE, source, mtype);
-                //System.out.println("Master Received : " + tempMin + " from rank " + source);
+                MPI.COMM_WORLD.Recv(tempMin,0, 1, MPI.DOUBLE, source, mtype); // Rank 0 receiving minimum from every rank to determine the global minimum for all ranks
                 masterMinimum = Math.min(masterMinimum, tempMin);
-            }
-            //System.out.println("Final Min after checking: " + masterMinimum);
-
-            // System.out.println("Final Min: " + masterMinimum);
-            // Date endTime = new Date( );
-            // System.out.println( "time elapsed = " + ( endTime.getTime( ) - startTime.getTime( ) ) + " msec" );
-
-            //Sending finalMinimum for border calculation
-            for(int rank = 1; rank < nprocs; rank++) {
-                MPI.COMM_WORLD.Send(masterMinimum, 0, 1, MPI.DOUBLE, rank, mtype );
             }
         }
         else{
             mtype = TAG_FROM_MASTER;
 	        MPI.COMM_WORLD.Recv(offset, 0, 1, MPI.INT, MASTER, mtype );
 	        MPI.COMM_WORLD.Recv(rows, 0, 1, MPI.INT, MASTER, mtype );
-            receivedXSorted = new PointsGrabber[rows[0]];
-            MPI.COMM_WORLD.Recv(receivedXSorted, 0, rows[0], MPI.OBJECT, MASTER, mtype);
+            receivedXSorted = new Points[rows[0]];
+            MPI.COMM_WORLD.Recv(receivedXSorted, 0, rows[0], MPI.OBJECT, MASTER, mtype); // Respective rank receiving their part of the data.
 
             ySortedPoints = receivedXSorted.clone();
 
-            rankMinimum = GetMinDistance(receivedXSorted, ySortedPoints, 0, receivedXSorted.length-1);
-            // System.out.println("Rank: " + myrank + " First Element: " + receivedXSorted[0].getX() + " , " + receivedXSorted[0].getY() + " Last Element: " + receivedXSorted[receivedXSorted.length-1].getX() + " , " + receivedXSorted[receivedXSorted.length-1].getY());
-            // System.out.println("Rank: " + myrank + " min: " + rankMinimum);
+            rankMinimum = GetMinDistance(receivedXSorted, ySortedPoints, 0, receivedXSorted.length-1); //Ranks caluclating minimum distance for their set of points.
 
-            MPI.COMM_WORLD.Send(rankMinimum, 0, 1, MPI.DOUBLE, MASTER, mtype);
-
-            //Receiving final minimum from the master for border calculation
-            MPI.COMM_WORLD.Recv(masterMinimum, 0, 1, MPI.DOUBLE, MASTER, mtype );
-            //System.out.println("rank: " + myrank + " recv min: " +finalMinimum);
-
-            //Trying to create border arrays
-            //calculateBorderMinima(xSortedPoints, finalMinimum);
+            MPI.COMM_WORLD.Send(rankMinimum, 0, 1, MPI.DOUBLE, MASTER, mtype);// Ranks sending their respective minimum to rank 0
+ 
         }
         if(myrank == 0){
-            //System.out.println("Final Min: " + masterMinimum);
-            return masterMinimum;
+            return masterMinimum; // Rank 0 returning the minimum
         }
         return masterMinimum;
     }
 
-    public static void calculateBorderMinima(PointsGrabber[] points, double minimum, Date startTime) throws MPIException {
-        //System.out.println("Adjacent Ranks Minima calculation function received: " + minimum);
+    //Function for calculation of minimum distance of points along the borders of adjacent ranks
+
+    public static void calculateBorderMinima(Points[] points, double minimum, Date startTime) throws MPIException {
 
         int myrank = MPI.COMM_WORLD.Rank();
         int nprocs = MPI.COMM_WORLD.Size();
@@ -279,7 +255,7 @@ public class PointsUtils {
         int offset[] = new int[1]; // offset in row
         offset[0] = 0;
         int sizeOfPointsList[] = new int[1]; // size of arrays which we are sending
-        PointsGrabber[] pointsArr = null;
+        Points[] pointsArr = null;
         int borderIndex = 0;
         int rows = 0;   // the actual # rows allocated to each rank
         
@@ -287,48 +263,36 @@ public class PointsUtils {
             if (rank == myrank) {
                 rows = ( rank < extra ) ? averows + 1 : averows;
                 borderIndex = (myrank < extra) ? rank * rows : rank * (rows + 1) + (myrank - extra) * rows;
-
-                // System.out.println("Rank: " + rank + " rows: " + rows + " borderIndex: " + borderIndex);
                 
-                int nextBorderIndex = borderIndex + rows;
+                int nextBorderIndex = borderIndex + rows;//Calculating the border index
                 double x = points[0].getX();
-                List<PointsGrabber> pointsList = new ArrayList<>();
+                List<Points> pointsList = new ArrayList<>();
                 for (int i = 0; i < points.length; i++) {
                     if (points[i].getX() > x + minimum) {
                         break;
                     }
                     if (points[i].getX() <= x + minimum) {
-                        pointsList.add(points[i]);
+                        pointsList.add(points[i]); //Points within the minimum are added in the array list that are then converted into array before sending
                     }
                 }
 
-                // for(int i = 0; i < pointsList.size(); i++) {
-                //     System.out.print("List A " + pointsList.get(i).getX() + " " + pointsList.get(i).getY() + ",");
-                // }
-                // System.out.println();
-
                 sizeOfPointsList[0] = pointsList.size();
-                MPI.COMM_WORLD.Send(sizeOfPointsList, 0, 1, MPI.INT, rank - 1, TAG_FROM_SLAVE);
+                MPI.COMM_WORLD.Send(sizeOfPointsList, 0, 1, MPI.INT, rank - 1, TAG_FROM_SLAVE);//Rank sending the size of points to the adjacent rank
                 if (!pointsList.isEmpty()) {
-                    pointsArr = new PointsGrabber[pointsList.size()];
+                    pointsArr = new Points[pointsList.size()];
                     pointsArr = pointsList.toArray(pointsArr);
-                    MPI.COMM_WORLD.Send(pointsArr, offset[0], pointsArr.length, MPI.OBJECT, rank - 1, TAG_FROM_SLAVE);
-
-                    //System.out.println("Sent : " + pointsArr.length + " to rank: " + (rank-1));
-                
+                    MPI.COMM_WORLD.Send(pointsArr, offset[0], pointsArr.length, MPI.OBJECT, rank - 1, TAG_FROM_SLAVE);// Rank sending the array object to the adjacent rank                
                 }
             }
         }
         for (int rank = 0; rank < nprocs -1; rank++) {
             if (myrank == rank) {
-                MPI.COMM_WORLD.Recv(sizeOfPointsList, 0, 1, MPI.INT, rank + 1, TAG_FROM_SLAVE);
+                MPI.COMM_WORLD.Recv(sizeOfPointsList, 0, 1, MPI.INT, rank + 1, TAG_FROM_SLAVE);//Receiving the size of the points from the adjacent rank
                 if (sizeOfPointsList[0] != 0) {
-                    pointsArr = new PointsGrabber[sizeOfPointsList[0]];
-                    MPI.COMM_WORLD.Recv(pointsArr, 0, sizeOfPointsList[0], MPI.OBJECT, rank + 1, TAG_FROM_SLAVE);
+                    pointsArr = new Points[sizeOfPointsList[0]];
+                    MPI.COMM_WORLD.Recv(pointsArr, 0, sizeOfPointsList[0], MPI.OBJECT, rank + 1, TAG_FROM_SLAVE);//Receiving the array object from the adjacent rank
 
-                    //System.out.println("Received : " + pointsArr.length + " from rank: " + (rank+1));
-
-                    List<PointsGrabber> pList = new ArrayList<>();
+                    List<Points> pList = new ArrayList<>();
                     Double x = points[0].getX();
                     for(int i = pointsArr.length - 1; i >= 0; i--) {
                         if (pointsArr[i].getX() > x + minimum) {
@@ -338,45 +302,30 @@ public class PointsUtils {
                             pList.add(pointsArr[i]);
                         }
                     }
-
-                    // for(int i = 0; i < pList.size(); i++) {
-                    //     System.out.print("List C " + pList.get(i).getX() + " " + pList.get(i).getY() + ",");
-                    // }
-                    // System.out.println();
-
-                    // for(int i = 0; i < pointsArr.length; i++) {
-                    //     System.out.print("List D " + pointsArr[i].getX() + " " + pointsArr[i].getY() + ",");
-                    // }
-                    //System.out.println();
                     
                     if(!pList.isEmpty()) {
                         pList.addAll(Arrays.asList(pointsArr));
-                        Set<PointsGrabber> setToRemoveDupli = new LinkedHashSet<>();
+                        Set<Points> setToRemoveDupli = new LinkedHashSet<>();
                         setToRemoveDupli.addAll(pList);
                         pList.clear();
                         pList.addAll(setToRemoveDupli);
-                        pointsArr = new PointsGrabber[pList.size()];
+                        pointsArr = new Points[pList.size()];
                         pointsArr = pList.toArray(pointsArr);
                         sortByY(pointsArr);
                         
-                        // for(int i = 0; i < pointsArr.length; i++) {
-                        //     System.out.print("List B " + pointsArr[i].getX() + " " + pointsArr[i].getY() + ",");
-                        // }
-                        // System.out.println();
-
+                        //Calculating the minimum distance of points after combing the two arrays of the adjacent ranks.
                         for (int i = 0; i < pointsArr.length; i++ ) {
                             for(int j = i+1; j < Math.min(pointsArr.length , i+7) ; j++) {
                                 minimum = Double.min(minimum, EuclideanDistance(pointsArr[i].getX(), pointsArr[i].getY(), pointsArr[j].getX(), pointsArr[j].getY()));
                             }
                         }                        
                     }
-                    // borderMinimum[0] = minimum;
-                    // MPI.COMM_WORLD.Reduce(borderMinimum, 0, reducedMinimum, 0, reducedMinimum.length, MPI.DOUBLE, MPI.MIN, MASTER);
                 }
             }
         }
-        //System.out.println("Phinal minimum : " + reducedMinimum[0]);
         if(myrank == 0){
+            System.out.println("Number of points: " + points.length);
+            System.out.println("Number of Nodes: " + nprocs);
             System.out.println("Final min: " + minimum);
             Date endTime = new Date( );
             System.out.println( "time elapsed = " + ( endTime.getTime( ) - startTime.getTime( ) ) + " msec" );
